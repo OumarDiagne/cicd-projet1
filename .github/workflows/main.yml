@@ -122,7 +122,7 @@ jobs:
       - name: download artefact build
         uses: actions/download-artifact@v3
         with:
-          name: build
+          name: frontend-dist
           path: ./dist
       - name: deployer sur le serveur
         run: |
