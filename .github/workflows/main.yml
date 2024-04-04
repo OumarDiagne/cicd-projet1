@@ -9,7 +9,7 @@ on:
     branches: main
 
 jobs:
-  tests:
+  check-tests-backend:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,13 +35,61 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: OumarDiagne/cicd-projet1
+  check-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - name: checkout le code
+        uses: actions/checkout@v4
+      - name: installer node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: "npm"
+          cache-dependency-path: ./client/package-lock.json
+      - name: install dependencies
+        run: npm ci --prefer-offline
+      - name: vérifie le code
+        run: npm run lint
+      - name: vérifie les vulnérabilités des dépendences
+        run: npm audit fix
+
+  build-frontend:
+    needs: check-frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - name: checkout le code
+        uses: actions/checkout@v4
+      - name: installer node.js
+        uses: actions/setup-node@v3
+        with:
+          cache: "npm"
+          cache-dependency-path: ./client/package-lock.json
+      - name: install dependencies
+        run: npm ci --prefer-offline
+      - name: build application frontend
+        run: npm run build
+      - name: upload artefact build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: ./client/dist
 
   deploy:
-    needs: tests
+    needs: [check-tests-backend, build-frontend]
     runs-on: ubuntu-latest
     steps:
       - name: checkout le code
         uses: actions/checkout@v4
+      - name: download artefact build
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: ./dist
       - name: deployer sur le serveur
         run: |
           eval $(ssh-agent -s)
@@ -49,5 +97,6 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H $SERVER_IP>> ~/.ssh/known_hosts
           scp -r ./server $SERVER_USER@$SERVER_IP:/var/www
+          scp -r ./dist $SERVER_USER@$SERVER_IP:/var/www/dist
           ssh $SERVER_USER@$SERVER_IP "cd /var/www/server && npm install --omit=dev"
           ssh $SERVER_USER@$SERVER_IP "cd /var/www/server && pm2 startOrRestart ecosystem.config.js --env production && pm2 save"
