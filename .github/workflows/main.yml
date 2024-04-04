@@ -85,6 +85,11 @@ jobs:
     steps:
       - name: checkout le code
         uses: actions/checkout@v4
+      - name: download artefact build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-dist
+          path: ./client/dist
       - name: installer node.js
         uses: actions/setup-node@v3
         with:
@@ -96,11 +101,7 @@ jobs:
           npm ci --prefer-offline
       - name: build application frontend
         run: npm run build
-      - name: download artefact build
-        uses: actions/download-artifact@v3
-        with:
-          name: frontend-dist
-          path: ./client/dist
+
       - name: start backend
         run: |
           cd server  
