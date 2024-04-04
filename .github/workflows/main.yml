@@ -30,6 +30,11 @@ jobs:
         run: npm audit fix
       - name: execute les tests
         run: npm run test:ci
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: OumarDiagne/cicd-projet1
 
   deploy:
     needs: tests
