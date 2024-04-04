@@ -76,8 +76,9 @@ jobs:
       - name: upload artefact build
         uses: actions/upload-artifact@v3
         with:
-          name: build
+          name: frontend-dist
           path: ./client/dist
+          retention-days: 1
   test-e2e-frontend:
     needs: build-frontend
     runs-on: ubuntu-latest
@@ -98,7 +99,7 @@ jobs:
       - name: download artefact build
         uses: actions/download-artifact@v3
         with:
-          name: build
+          name: frontend-dist
           path: ./client/dist
       - name: start backend
         run: |
@@ -112,7 +113,7 @@ jobs:
           start: npm run preview
           wait-on: http://localhost:4173
           wait-on-timeout: 60
-          config: baseurl=http://localhost:4173
+          config: baseUrl=http://localhost:4173
 
   deploy:
     needs: [check-tests-backend, test-e2e-frontend]
