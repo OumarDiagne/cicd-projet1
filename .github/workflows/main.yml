@@ -99,9 +99,6 @@ jobs:
         run: |
           cd server
           npm ci --prefer-offline
-      - name: build application frontend
-        run: npm run build
-
       - name: start backend
         run: |
           cd server  
