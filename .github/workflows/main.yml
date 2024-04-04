@@ -1,8 +1,8 @@
 name: CI/CD workflow
 
 env:
-SERVER_IP: "162.19.78.126"
-SERVER_USER: "root"
+  SERVER_IP: "162.19.78.126"
+  SERVER_USER: "root"
 
 on:
   push:
